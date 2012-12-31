@@ -4,11 +4,14 @@
 
 %}
 
-%token  TABLEAU_JSON OBJET_JSON
+%token  TABLEAU_JSON OBJET_JSON VALEUR_JSON
 %token  CROCHET_GAUCHE CROCHET_DROITE
 %token  ACCOLADE_GAUCHE ACCOLADE_DROITE
 %token  DOUBLE_POINT VIRGULE
 %token  FIN
+
+%left VIRGULE
+%left DOUBLE_POINT
 
 %start Input
 %%
@@ -24,17 +27,11 @@ Ligne:
   ;
 
 Expression:
-    TABLEAU_JSON      { $$=$1; }
-    
-// Suite à faire...
-
-  | Expression PLUS Expression  { $$=$1+$3; }
-  | Expression MOINS Expression { $$=$1-$3; }
-  | Expression FOIS Expression  { $$=$1*$3; }
-  | Expression DIVISE Expression  { $$=$1/$3; }
-  | MOINS Expression %prec NEG  { $$=-$2; }
-  | Expression PUISSANCE Expression { $$=pow($1,$3); }
-  | PARENTHESE_GAUCHE Expression PARENTHESE_DROITE  { $$=$2; }
+    VALEUR_JSON      { $$=$1; }
+  | Expression VIRGULE Expression  { $$= ??? ; }
+  | Expression DOUBLE_POINT Expression { $$= ??? ; }
+  | ACCOLADE_GAUCHE Expression ACCOLADE_DROITE  { $$=$2; }
+  | CROCHET_GAUCHE Expression CROCHET_DROITE  { $$=$2; }
   ;
 
 %%
