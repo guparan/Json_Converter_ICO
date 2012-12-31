@@ -29,7 +29,12 @@ jvalue      null | true | false | {chaine} | {nbflottant} | {jobject} | {jarray}
 {jobject}  {
       yylval=yytext;
       return(OBJET_JSON);
-    }   
+    }
+    
+{jvalue}   {
+	  yyval=yytext;
+	  return(VALEUR_JSON);
+	}
 
 "["   return(CROCHET_GAUCHE);
 "]"   return(CROCHET_DROITE);
