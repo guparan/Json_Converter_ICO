@@ -1,48 +1,54 @@
 %{
 
 #include "global.h"
+int total = 0;
 
 %}
 
-blancs      [ \t]+
+indent		[ \n\t]*
+integer		0|[1-9][0-9]*
+power		[eE][+-]?{integer}
 
-chiffre     [0-9]
-entier      [1-9]{chiffre}*
-exposant    [eE][+-]?{entier}
-nbflottant  {entier}("."{chiffre}+)?{exposant}?
+number		[-]?{integer}["."[0-9]+]?{power}?
+string		\"[^\"\/\b\f\n\r\t\u\\]+\"
 
-chaine      \"[^\"\\\/\b\f\n\r\t\u]+\"
-jobject		\{ {chaine} : {jvalue}(", "{chaine} : {jvalue})* \}
-jarray      \[ {jobject}(", "{jobject})* \]
-jvalue      null | true | false | {chaine} | {nbflottant} | {jobject} | {jarray}
-	  
+jpair		{string}{indent}":"{indent}{jvalue}
+jobject		\{{indent}{jpair}[{indent},{indent}{jpair}]*{indent}\}
+jarray		\[{indent}{jobject}({indent}","{indent}{jobject})*{indent}\]
+jvalue		"null"|"true"|"false"|{string}|{number}|{jobject}|{jarray}
 
 %%
 
-{blancs}  { /* On ignore */ }
-
-{jarray}  {
-      yylval=yytext;
-      return(TABLEAU_JSON);
-    }
+{jarray} {
+	total++;
+	yylval = yytext;
+	return(JSON_ARRAY);
+}
     
-{jobject}  {
-      yylval=yytext;
-      return(OBJET_JSON);
-    }
+{jobject} {
+	yylval = yytext;
+	return(JSON_OBJECT);
+}
     
-{jvalue}   {
-	  yyval=yytext;
-	  return(VALEUR_JSON);
-	}
+{jvalue} {
+	yylval = yytext;
+	return(JSON_VALUE);
+}
 
-"["   return(CROCHET_GAUCHE);
-"]"   return(CROCHET_DROITE);
+\[   return(LEFT_BRACKET);
+\]   return(RIGHT_BRACKET);
 
-"{"   return(ACCOLADE_GAUCHE);
-"}"   return(ACCOLADE_DROITE);
+\{   return(LEFT_BRACE);
+\}   return(RIGHT_BRACE);
 
-":"   return(DOUBLE_POINT);
-","   return(VIRGULE);
+:   return(COLON);
+,   return(COMA);
 
-"\n"  return(FIN);
+<<EOF>>  return(END);
+
+%%
+
+int main( void ) {
+	yylex();
+	printf("\nNombre de jarray du fichier : %d\n\n", total);
+}
